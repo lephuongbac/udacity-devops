@@ -178,32 +178,32 @@ jobs:
       - destroy-environment
             
 
-configure-infrastructure:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Install tar utility
-          command: |
-            yum install -y tar gzip
-      - run:
-          name: Install Ansible
-          command: |
-            yum update
-            yum install epel-release
-            yum install ansible
-      - add_ssh_keys:
-          fingerprints: ["80:b2:92:34:7e:73:d1:43:06:a8:05:67:60:64:a8:b1"]
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Configure Server
-          command: |
-            cd .circleci/ansible
-            cat inventory.txt
-            ansible-playbook -i inventory.txt configure-server.yml
-      - destroy-environment
+  configure-infrastructure:
+      docker:
+        - image: amazon/aws-cli
+      steps:
+        - checkout
+        - run:
+            name: Install tar utility
+            command: |
+              yum install -y tar gzip
+        - run:
+            name: Install Ansible
+            command: |
+              yum update
+              yum install epel-release
+              yum install ansible
+        - add_ssh_keys:
+            fingerprints: ["80:b2:92:34:7e:73:d1:43:06:a8:05:67:60:64:a8:b1"]
+        - attach_workspace:
+            at: ~/
+        - run:
+            name: Configure Server
+            command: |
+              cd .circleci/ansible
+              cat inventory.txt
+              ansible-playbook -i inventory.txt configure-server.yml
+        - destroy-environment
 
 #   run-migrations:
 #     docker:
@@ -336,8 +336,8 @@ workflows:
           filters:
             branches:
               only: [master]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:

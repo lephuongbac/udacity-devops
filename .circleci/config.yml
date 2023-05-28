@@ -1,6 +1,28 @@
 version: 2.1
 
 commands:
+  install_awscli:
+    description: Install AWS CLI v2
+    steps:
+      - run:
+          name: Install AWS CLI v2
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+
+  install_ansible:
+    description: install ansible 
+    steps:
+      - run: 
+          name: install ansible 
+          command: |
+              sudo apt update 
+              #sudo apt install software-properties-common -y 
+              sudo add-apt-repository --yes --update ppa:ansible/ansible
+              #sudo apt -y update && apt install -y python3
+              sudo apt install -y python3
+              sudo apt install -y ansible
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -176,34 +198,24 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure
       - destroy-environment
-            
-
   configure-infrastructure:
-      docker:
-        - image: amazon/aws-cli
-      steps:
-        - checkout
-        - run:
-            name: Install tar utility
-            command: |
-              yum install -y tar gzip
-        - run:
-            name: Install Ansible
-            command: |
-              yum update
-              yum install epel-release
-              yum install ansible
-        - add_ssh_keys:
-            fingerprints: ["80:b2:92:34:7e:73:d1:43:06:a8:05:67:60:64:a8:b1"]
-        - attach_workspace:
-            at: ~/
-        - run:
-            name: Configure Server
-            command: |
-              cd .circleci/ansible
-              cat inventory.txt
-              ansible-playbook -i inventory.txt configure-server.yml
-        - destroy-environment
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - install_awscli
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints: ["80:b2:92:34:7e:73:d1:43:06:a8:05:67:60:64:a8:b1"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Configure server
+          command: |
+            cat .circleci/ansible/inventory.txt
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
 
 #   run-migrations:
 #     docker:

@@ -1,0 +1,17 @@
+- name: "Creates directory"
+  file:
+    path: "~/server"
+    state: "directory"
+    mode: 0755
+
+- name: "Unarchive backend files"
+  unarchive:
+    src: artifact.tar.gz
+    dest: ~/server
+
+- name: "Run the web server"
+  shell:
+    cmd: |
+      cd ~/backend-app/dist
+      pm2 stop all
+      pm2 start main.js

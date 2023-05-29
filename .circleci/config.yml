@@ -307,9 +307,9 @@ jobs:
           command: |
             cd backend
             npm run build
-            tar -czf artifact.tar.gz dist/* package*
             cd ..
-            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
+            tar -C backend -czvf artifact.tar.gz .
+            cp artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
           name: Deploy backend
           command: |
@@ -349,7 +349,7 @@ jobs:
             # When the backend server is not ready, let retry upto 30mins
             test_result=$(eval curl \
               --verbose --fail \
-              --retry 5 --retry-max-time 1800 --retry-all-errors \
+              --retry 20 --retry-max-time 1800 --retry-all-errors \
               --url "$API_URL/api/status")
             if echo $test_result | grep "ok" > /dev/null
             then

@@ -67,7 +67,7 @@ commands:
             then
               cd ~/project/backend
               npm install
-              npm run migration:revert
+              npm run migrations:revert
             fi
 
 jobs:
@@ -250,7 +250,8 @@ jobs:
               curl https://kvdb.io/3yM5u42jZZGDrJasjah2yx/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy-environment
-      - revert-migrations
+      - revert-migrations:
+          Workflow_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
 
   deploy-frontend:
     docker:
@@ -282,7 +283,8 @@ jobs:
             npm run build
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment
-      - revert-migrations
+      - revert-migrations:
+          Workflow_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
   deploy-backend:
     docker:
       - image: cimg/base:stable
@@ -320,7 +322,8 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment
-      - revert-migrations
+      - revert-migrations:
+          Workflow_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
   smoke-test:
     docker:
       - image: amazon/aws-cli
@@ -361,7 +364,8 @@ jobs:
               exit 1
             fi
       - destroy-environment
-      - revert-migrations
+      - revert-migrations:
+          Workflow_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
 
   cloudfront-update:
     docker:
@@ -386,7 +390,8 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --stack-name InitialStack
       - destroy-environment
-      - revert-migrations
+      - revert-migrations:
+          Workflow_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
   cleanup:
     docker:
       - image: cimg/base:stable
